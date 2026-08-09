@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — AIAASA</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/logo.png" alt="AIAASA logo"> AIAASA</a>
+    <div class="navlinks">
+      <a href="index.html#about">About</a>
+      <a href="index.html#events">Events</a>
+      <a href="gallery.html" class="active">Gallery</a>
+      <a href="testimonials.html">Testimonials</a>
+    </div>
+    <a class="navcta" href="index.html#register">Join Now</a>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="wrap section-head">
+    <span class="eyebrow">Moments from the family</span>
+    <h2>Gallery</h2>
+    <p>Snapshots from the Central Conference, Zonal Camps, and everything in between — the AIAASA family, in photos.</p>
+  </div>
+</header>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="gallery-grid" id="galleryGrid">
+      <div class="testi-loading">Loading photos…</div>
+    </div>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox">
+  <span class="lb-close" id="lbClose">✕</span>
+  <div>
+    <img id="lbImg" src="" alt="">
+    <div class="lb-cap" id="lbCap"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <a class="foot-brand" href="index.html"><img src="assets/logo.png" alt="AIAASA logo"> AIAASA — Special Family</a>
+    <div class="fine">All India African Adventist Students Association</div>
+  </div>
+</footer>
+
+<script>
+  const grid = document.getElementById('galleryGrid');
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbCap = document.getElementById('lbCap');
+
+  fetch('assets/gallery/manifest.json')
+    .then(r => r.json())
+    .then(photos => {
+      if (!photos || photos.length === 0) {
+        showEmpty();
+        return;
+      }
+      grid.innerHTML = '';
+      photos.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'g-item';
+        item.innerHTML = `<img src="assets/gallery/${p.file}" alt="${p.caption || ''}" loading="lazy">
+          <div class="cap">${p.caption || ''}</div>`;
+        item.addEventListener('click', () => openLightbox(`assets/gallery/${p.file}`, p.caption || ''));
+        grid.appendChild(item);
+      });
+    })
+    .catch(() => showEmpty());
+
+  function showEmpty(){
+    grid.innerHTML = `<div class="gallery-empty">
+      <h3>No photos yet</h3>
+      <p>Add image files to <code>assets/gallery/</code> and list them in <code>assets/gallery/manifest.json</code> to have them show up here.</p>
+    </div>`;
+  }
+
+  function openLightbox(src, cap){
+    lbImg.src = src;
+    lbCap.textContent = cap;
+    lightbox.classList.add('open');
+  }
+  document.getElementById('lbClose').addEventListener('click', () => lightbox.classList.remove('open'));
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.remove('open'); });
+</script>
+
+</body>
+</html>

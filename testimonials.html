@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testimonials — AIAASA</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="assets/logo.png" alt="AIAASA logo"> AIAASA</a>
+    <div class="navlinks">
+      <a href="index.html#about">About</a>
+      <a href="index.html#events">Events</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="testimonials.html" class="active">Testimonials</a>
+    </div>
+    <a class="navcta" href="index.html#register">Join Now</a>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="wrap section-head">
+    <span class="eyebrow">In their own words</span>
+    <h2>Testimonials</h2>
+    <p>Members share what AIAASA has meant to them — fellowship, mentorship, and a family away from home.</p>
+  </div>
+</header>
+
+<section style="padding-top:0;padding-bottom:60px;">
+  <div class="wrap">
+    <div class="testi-grid" id="testiGrid">
+      <div class="testi-loading">Loading stories…</div>
+    </div>
+  </div>
+</section>
+
+<section class="register" style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head" style="margin-left:auto;margin-right:auto;text-align:center;">
+      <span class="eyebrow" style="justify-content:center;">Share yours</span>
+      <h2>Tell us your AIAASA story</h2>
+      <p style="margin-left:auto;margin-right:auto;">A sentence or two is plenty. Your story could be exactly what a new student needs to read.</p>
+    </div>
+
+    <div class="reg-card">
+      <div class="reg-head">
+        <div class="htext">
+          <span class="eyebrow">Testimonial</span>
+          <h3>Share Your Experience</h3>
+        </div>
+        <img src="assets/logo.png" alt="AIAASA logo">
+      </div>
+
+      <div class="reg-body" id="formView">
+        <form id="testiForm">
+          <div class="field">
+            <label for="tName">Your Name</label>
+            <input type="text" id="tName" name="tName" required placeholder="e.g. Grace Mwangi">
+          </div>
+          <div class="field">
+            <label for="tOrigin">Station & Country (optional)</label>
+            <input type="text" id="tOrigin" name="tOrigin" placeholder="e.g. Pune, Kenya">
+          </div>
+          <div class="field">
+            <label for="tText">Your Testimonial</label>
+            <textarea id="tText" name="tText" required maxlength="280" rows="4" placeholder="What has AIAASA meant to you?"></textarea>
+            <div class="char-count"><span id="charCount">0</span>/280</div>
+          </div>
+          <button type="submit" class="submit-btn" id="submitBtn">Share My Story →</button>
+          <div class="status-msg" id="statusMsg"></div>
+          <p class="form-note">Your testimonial may be featured on this page.</p>
+        </form>
+      </div>
+
+      <div class="success-view" id="successView">
+        <div class="success-stamp">Approved</div>
+        <h3>Thank you 🎉</h3>
+        <p>Your story has been received and may appear on this page shortly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a class="foot-brand" href="index.html"><img src="assets/logo.png" alt="AIAASA logo"> AIAASA — Special Family</a>
+    <div class="fine">All India African Adventist Students Association</div>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script>
+  // ---- Load and display testimonials ----
+  const testiGrid = document.getElementById('testiGrid');
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function loadTestimonials(){
+    if (SHEET_ENDPOINT.includes('PASTE_YOUR')) {
+      testiGrid.innerHTML = `<div class="testi-empty">Testimonials will appear here once the Google Sheet is connected.</div>`;
+      return;
+    }
+    fetch(SHEET_ENDPOINT + '?type=testimonials')
+      .then(r => r.json())
+      .then(list => {
+        if (!list || list.length === 0) {
+          testiGrid.innerHTML = `<div class="testi-empty">No stories yet — be the first to share yours below!</div>`;
+          return;
+        }
+        testiGrid.innerHTML = '';
+        list.forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'testi-card';
+          card.innerHTML = `
+            <div class="quote-glyph">"</div>
+            <p class="text">${escapeHtml(t.text)}</p>
+            <div class="who">${escapeHtml(t.name || 'AIAASA Member')}${t.origin ? `<span>${escapeHtml(t.origin)}</span>` : ''}</div>
+          `;
+          testiGrid.appendChild(card);
+        });
+      })
+      .catch(() => {
+        testiGrid.innerHTML = `<div class="testi-empty">Couldn't load stories right now — please refresh the page.</div>`;
+      });
+  }
+  loadTestimonials();
+
+  // ---- Character counter ----
+  const tText = document.getElementById('tText');
+  const charCount = document.getElementById('charCount');
+  tText.addEventListener('input', () => { charCount.textContent = tText.value.length; });
+
+  // ---- Submit testimonial ----
+  const form = document.getElementById('testiForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const formView = document.getElementById('formView');
+  const successView = document.getElementById('successView');
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    statusMsg.style.display = 'none';
+
+    if (SHEET_ENDPOINT.includes('PASTE_YOUR')) {
+      statusMsg.textContent = "Setup needed: this form isn't connected to a Google Sheet yet.";
+      statusMsg.className = 'status-msg error';
+      statusMsg.style.display = 'block';
+      return;
+    }
+
+    const data = {
+      formType: "testimonial",
+      name: form.tName.value.trim(),
+      origin: form.tOrigin.value.trim(),
+      text: form.tText.value.trim(),
+      submittedAt: new Date().toISOString()
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    try {
+      await fetch(SHEET_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(data)
+      });
+      formView.style.display = 'none';
+      successView.style.display = 'block';
+    } catch (err) {
+      statusMsg.textContent = "Something went wrong — please try again.";
+      statusMsg.className = 'status-msg error';
+      statusMsg.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Share My Story →";
+    }
+  });
+</script>
+
+</body>
+</html>
